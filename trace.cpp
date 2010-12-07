@@ -9,7 +9,7 @@
 #include <time.h>
 using namespace std;
 
-void sendTo(string hostn, int reqport, TracePacket p)
+void sendTo(string IPin, int reqport, TracePacket p)
 {
         time_t seconds;
         //struct hostent *server;
@@ -23,11 +23,11 @@ void sendTo(string hostn, int reqport, TracePacket p)
         sock_fd = socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
         receiver_addr.sin_family = AF_INET;
         //bcopy((char *)server->h_addr,(char *)&receiver_addr.sin_addr.s_addr,server->h_length);
-        receiver_addr.sin_addr.s_addr = inet_addr(hostn.c_str());
+        receiver_addr.sin_addr.s_addr = inet_addr(IPin.c_str());
         receiver_addr.sin_port = htons(reqport);
         char *ipadd = inet_ntoa(receiver_addr.sin_addr);
         seconds = time(NULL);
-        printf("Sending to: %s on port %d at time %ld \n", ipadd,reqport, seconds);
+        //printf("Sending to: %s on port %d at time %ld \n", ipadd,reqport, seconds);
         sendto(sock_fd, pData.c_str(), 10000, 0,(struct sockaddr*)&receiver_addr,sizeof(receiver_addr));
         close(sock_fd);
 }
@@ -87,9 +87,10 @@ TracePacket listenFor(int listenport)
 
 int main (int argc, char const *argv[])
 {
-	int i,port,sPort,dPort;
+	int i,port,sPort,dPort, debug;
 	string sIP,dIP;
 	string sHost,dHost;
+	debug = 0;
 	for (i = 0; i < argc; i++)
         {
            if ((strcmp("-a", argv[i]) == 0) && (i < argc - 1))
@@ -102,6 +103,8 @@ int main (int argc, char const *argv[])
              dHost = argv[i + 1];
 	   if ((strcmp("-e", argv[i]) == 0) && (i < argc - 1))
              dPort = atoi(argv[i + 1]);
+	   if ((strcmp("-f", argv[i]) == 0) && (i < argc - 1))
+             debug = atoi(argv[i + 1]);
 
         }
 	hostent * record = gethostbyname(sHost.c_str());
@@ -121,16 +124,25 @@ int main (int argc, char const *argv[])
 	in_addr * address2 = (in_addr * )record2->h_addr;
 	dIP = inet_ntoa(* address2);
 	int TTL = 0;
-	printf("%s dIP, %d dPort, %s sIP, %d sPort, %d tracePort  \n",dIP.c_str(),dPort,sIP.c_str(),sPort,port);
+	if(debug == 1)
+	{
+		printf("my IP is %s and hostname is %s \n", getMyIP().c_str(),getMyHost().c_str());
+	}
 	do
 	{
-		TracePacket sent = TracePacket('t',TTL,sIP,sPort,dIP,dPort);
-		sendTo(dIP,dPort,sent);
+		if(debug == 1)
+		{
+			printf("Sending Packet: S-IP = %s S-Port = %d \n",sIP.c_str(),sPort);
+			printf("Sending Packet: D-IP = %s D-Port = %d TTL = %d \n",dIP.c_str(),dPort,TTL); 
+		}
+		TracePacket sent = TracePacket('t',TTL,sIP,sPort,dIP,dPort,getMyIP().c_str(),port);
+		sendTo(sIP,sPort,sent);
 		TracePacket recieved = listenFor(port);
 		printf("TracePacket Recieved from: %s on port %d \n", recieved.sourceIP().c_str(), recieved.sourcePort());
 		if(0 == strcmp(sent.destinationIP().c_str(),recieved.sourceIP().c_str()))
 		{
 			//ROUTE FOUND
+			printf("Route Found, Ending\n");
 			break;
 		}
 		TTL = TTL + 1;
