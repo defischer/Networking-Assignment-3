@@ -14,12 +14,14 @@ class TracePacket {
 		// *** Constructors *** //
 		TracePacket()
 		{
-			_type = NULL;
+			_type = ' ';
 			_TTL = 0;
 			_sourceIP = "";
 			_sourcePort = 0;
 			_destinationIP = "";
 			_destinationPort = 0;
+			_traceIP = "";
+			_tracePort = 0;
 		}
 		
 		TracePacket(string packet)
@@ -36,10 +38,14 @@ class TracePacket {
 			_destinationIP = contents.at(4).c_str();
 			_destinationPort = atoi(contents.at(5).c_str());
 			
+			_traceIP = contents.at(6).c_str();
+			_tracePort = atoi(contents.at(7).c_str());
+
 		}
 		
 		TracePacket(char type, int TTL, string sourceIP, int sourcePort,
-			string destinationIP, int destinationPort)
+			string destinationIP, int destinationPort, string traceIP,
+			int tracePort)
 		{
 			_type = type;
 			_TTL = TTL;
@@ -47,6 +53,8 @@ class TracePacket {
 			_sourcePort = sourcePort;
 			_destinationIP = destinationIP;
 			_destinationPort = destinationPort;
+			_traceIP = traceIP;
+			_tracePort = tracePort;
 		}
 		
 		// *** Getters & Setters *** //
@@ -68,13 +76,19 @@ class TracePacket {
 		TracePacket& destinationPort(unsigned short destinationPort) { _destinationPort = destinationPort; return *this; }
 		unsigned short destinationPort() { return _destinationPort; }
 		
+		TracePacket& traceIP(string traceIP) { _traceIP = traceIP; return *this; }
+		string traceIP(){return _traceIP;}
+		
+		TracePacket& tracePort(int tracePort){_tracePort = tracePort; return *this;}
+		int tracePort(){return _tracePort;}
+		
 		// *** Public Methods *** //
 		string toString() 
 		{
 			// char *packet;
 			stringstream packet("");
 			
-			packet << _type << " " << _TTL << " " << _sourceIP << " " << _sourcePort << " " << _destinationIP << " " << _destinationPort;
+			packet << _type << " " << _TTL << " " << _sourceIP << " " << _sourcePort << " " << _destinationIP << " " << _destinationPort << " " << _traceIP << " " << _tracePort;
 			
 			return packet.str();
 		}
@@ -86,7 +100,8 @@ class TracePacket {
 		unsigned short _sourcePort;
 		string _destinationIP;
 		unsigned short _destinationPort;
-		
+		string _traceIP;
+		int _tracePort;
 		vector<string> explode( const string &delimiter, const string &str)
 		{
 		    vector<string> arr;
