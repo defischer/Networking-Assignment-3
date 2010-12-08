@@ -126,23 +126,23 @@ int main (int argc, char const *argv[])
 	int TTL = 0;
 	if(debug == 1)
 	{
-		printf("my IP is %s and hostname is %s \n", getMyIP().c_str(),getMyHost().c_str());
+		//printf("my IP is %s and hostname is %s \n", getMyIP().c_str(),getMyHost().c_str());
 	}
 	do
 	{
 		if(debug == 1)
 		{
-			printf("Sending Packet: S-IP = %s S-Port = %d \n",sIP.c_str(),sPort);
-			printf("Sending Packet: D-IP = %s D-Port = %d TTL = %d \n",dIP.c_str(),dPort,TTL); 
+			printf("\nSending Packet: S-IP = %s S-Port = %d \n",sIP.c_str(),sPort);
+			printf("              : D-IP = %s D-Port = %d TTL = %d \n",dIP.c_str(),dPort,TTL); 
 		}
 		TracePacket sent = TracePacket('t',TTL,sIP,sPort,dIP,dPort,getMyIP().c_str(),port);
 		sendTo(sIP,sPort,sent);
 		TracePacket recieved = listenFor(port);
-		printf("TracePacket Recieved from: %s on port %d \n", recieved.sourceIP().c_str(), recieved.sourcePort());
+		printf("\nTracePacket Recieved from: %s on port %d \n", recieved.sourceIP().c_str(), recieved.sourcePort());
 		if(0 == strcmp(sent.destinationIP().c_str(),recieved.sourceIP().c_str()))
 		{
 			//ROUTE FOUND
-			printf("Route Found, Ending\n");
+			printf("\nRoute Found, Ending\n\n");
 			break;
 		}
 		TTL = TTL + 1;
